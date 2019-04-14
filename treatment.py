@@ -4,7 +4,6 @@
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 from mpl_toolkits.mplot3d import Axes3D
 from geopy import distance
 
@@ -65,9 +64,8 @@ class GPSTreatment:
         return np.sqrt(lon_sub + lat_sub)
 
     def stddev_abs(self, vec_1, vec_2):
-        print('\nStd dev absolute between {0} and {1}:'.format(vec_1, vec_2))
         stddev = np.std(self.vec_length(vec_1, vec_2))
-        print(stddev)
+        print('Std dev absolute between {0} and {1}: {2:.4}'.format(vec_1, vec_2, stddev))
         return stddev
 
 class Plotter():
@@ -85,7 +83,7 @@ class Plotter():
         return wrapper
 
     def separate_h(self):
-        fig, log = plt.subplots(1, self.gps.n)
+        fig, log = plt.subplots(1, self.gps.n, sharex=True, sharey=True)
         fig.suptitle('Separate horizontal measuring, meters - {0}'.format(self.gps.meters_en))
         dict_args = dict(marker='+')
         for i in range(self.gps.n):
@@ -130,13 +128,13 @@ class Plotter():
     def stddev_rel(self):
         print('\nStd dev relative:')
         print(list(self.gps.label.keys())[1:])
-        fig, bar = plt.subplots(1, self.gps.n)
+        fig, bar = plt.subplots(1, self.gps.n, sharex=True, sharey=True)
         for i in range(self.gps.n):
             print(np.std(self.gps.data[i][:, 1:], 0))
             bar[i].bar(list(self.gps.label.keys())[1:], np.std(self.gps.data[i][:, 1:], 0))
 
     def stddev_abs(self):
-        fig, bar = plt.subplots(1, self.gps.n)
+        fig, bar = plt.subplots(1, self.gps.n, sharex=True, sharey=True)
         fig.suptitle('Std dev absolute measuring all-by-one, meters - {0}'.format(self.gps.meters_en))
         for i in range(self.gps.n):
             for m in range(self.gps.n):
@@ -162,25 +160,26 @@ def treatment(args):
     # gps.stddev_abs(0,2)
     # gps.print_data()
 
-    if args.plot_en:
-        plots = tuple(args.plot_show)
-        plotter.separate_h()
-        plotter.together_h(plots)
-        plotter.together_3d(plots)
-        plotter.together_v(plots)
-        plotter.length_abs(plots)
-        plotter.stddev_rel()
-        plotter.stddev_abs()
-        plt.show()
+    plots = tuple(args.plot_show)
+    plotter.separate_h()
+    plotter.together_h(plots)
+    plotter.together_3d(plots)
+    plotter.together_v(plots)
+    plotter.length_abs(plots)
+    plotter.stddev_rel()
+    plotter.stddev_abs()
+    plt.show()
 
 def main():
     parser = argparse.ArgumentParser(description="Commad line tool for making plots from GPS logs")
     parser.add_argument("-n", "--files_number", help="Total number of files to treatment", type=int)
     parser.add_argument("-p", "--prefix", help="Filename prefix (incliding folder)", type=str)
     parser.add_argument("-m", "--meters", help="Enable converting to meters", type=bool, default=True)
-    parser.add_argument("-pe", "--plot_en", help="Enable plots", type=bool, default=True)
     parser.add_argument("-ps", "--plot_show", help="Which plots to view", type=int, default=(), nargs='+')
     args = parser.parse_args()
+    if args.files_number <= 1:
+        print('Number of files must be more than 1')
+        exit()
 
     treatment(args)
 
