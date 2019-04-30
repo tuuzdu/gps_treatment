@@ -14,7 +14,7 @@ class GPSTreatment:
         self.n = log_num
         self.meters_en = meters_en
         self.data = self.load_data(self.n, prefix)
-        if meters_en == True:
+        if self.meters_en == 1:
             sigma = 0.0001
             self.origin = [np.nanmin(self.data[0][:, self.label['lat']]) - sigma, np.nanmin(self.data[0][:, self.label['lon']]) - sigma]
             self.angles_to_meters()
@@ -174,13 +174,13 @@ def main():
     parser = argparse.ArgumentParser(description="Commad line tool for making plots from GPS logs")
     parser.add_argument("-n", "--files_number", help="Total number of files to treatment", type=int)
     parser.add_argument("-p", "--prefix", help="Filename prefix (incliding folder)", type=str)
-    parser.add_argument("-m", "--meters", help="Enable converting to meters", type=bool, default=True)
+    parser.add_argument("-m", "--meters", help="Enable converting to meters", type=int, default=1)
     parser.add_argument("-ps", "--plot_show", help="Which plots to view", type=int, default=(), nargs='+')
     args = parser.parse_args()
     if args.files_number <= 1:
         print('Number of files must be more than 1')
         exit()
-
+        
     treatment(args)
 
 if __name__ == '__main__':
